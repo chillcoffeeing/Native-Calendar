@@ -1,25 +1,35 @@
 {
-  "name": "date",
+  "name": "native-datepicker",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
-  "scripts": {
-    "dev": "gulp"
+  "main": "dist/n-calendar.cjs.js",
+  "module": "dist/n-calendar.esm.js",
+  "browser": "dist/n-calendar.umd.js",
+  "dependencies": {},
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^20.0.0",
+    "@rollup/plugin-node-resolve": "^13.0.4",
+    "@rollup/plugin-typescript": "^8.2.5",
+    "node-sass": "^6.0.1",
+    "rollup": "^2.56.2",
+    "rollup-plugin-copy": "^3.4.0",
+    "rollup-plugin-scss": "^3.0.0",
+    "rollup-plugin-terser": "^7.0.2",
+    "tslib": "^2.3.1",
+    "typescript": "^4.3.5"
   },
-  "keywords": [],
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vi-system/Native-Datepicker.git"
+  },
   "author": "",
   "license": "ISC",
-  "devDependencies": {
-    "@babel/core": "^7.14.6",
-    "@babel/preset-env": "^7.14.7",
-    "@babel/preset-typescript": "^7.14.5",
-    "@babel/register": "^7.14.5",
-    "gulp": "^4.0.2",
-    "gulp-autoprefixer": "^8.0.0",
-    "gulp-babel": "^8.0.0",
-    "gulp-imagemin": "^7.1.0",
-    "gulp-postcss": "^9.0.0",
-    "gulp-typescript": "^6.0.0-alpha.1",
-    "typescript": "^4.3.5"
-  }
+  "bugs": {
+    "url": "https://github.com/Vi-system/Native-Datepicker/issues"
+  },
+  "homepage": "https://github.com/Vi-system/Native-Datepicker#readme"
 }

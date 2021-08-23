@@ -5,7 +5,7 @@ import {
   UIState,
   HookCallback
 } from "../types";
-export abstract class NativeDatePickerEvents {
+export default abstract class NativeCalendarEvents {
   protected Listeners: ListenersMap = new Map()
 
   protected eventTrigger(

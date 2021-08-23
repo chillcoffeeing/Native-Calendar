@@ -1,6 +1,6 @@
-import { NativeDatePickerEvents } from "./events.js";
+import NativeCalendarEvents from "./events";
 
-import es from "../locale/locale-es.js";
+import es from "../locale/locale-es";
 
 import {
   FirstWeekDay,
@@ -9,7 +9,7 @@ import {
   InstanceOptions
 } from "../types";
 
-export abstract class NativeDatePickerData extends NativeDatePickerEvents {
+export default abstract class NativeCalendarData extends NativeCalendarEvents {
   protected firstDayOfWeek: FirstWeekDay;
 
   protected mainDateState: DateState;

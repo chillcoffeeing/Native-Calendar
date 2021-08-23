@@ -1,12 +1,12 @@
-import builder from "../util/builder.js";
-import { NativeDatePickerData } from "./data.js";
+import builder from "../util/builder";
+import NativeCalendarData from "./data";
 import {
   UIControls,
   UIState,
   InstanceOptions, UpdateMonthParam,
   BuilderObject
 } from "../types";
-export class NativeDatePicker extends NativeDatePickerData {
+export default class NativeCalendar extends NativeCalendarData {
   private rootElement: Element;
 
   private controlsPanel: UIControls;
@@ -110,14 +110,6 @@ export class NativeDatePicker extends NativeDatePickerData {
     $dropdownToggle.addEventListener("click", () => {
       $dropdown.classList.toggle("ndp-show-dropdown");
     });
-    
-    document.addEventListener("click", (e: Event) => {
-      if($dropdown.classList.contains("ndp-show-dropdown")){
-        if (!this.rootElement.contains(e.target as HTMLElement)) {
-          $dropdown.classList.remove("ndp-show-dropdown");
-        }
-      }
-    })
 
     this.rootElement.className = "ndp-root-container";
     this.rootElement.insertAdjacentElement("afterbegin", $inputBox);
@@ -267,20 +259,3 @@ export class NativeDatePicker extends NativeDatePickerData {
     }
   }
 }
-
-const datepicker = new NativeDatePicker("#my-native-datepicker", {
-  firstWeekDay: "sunday",
-});
-
-datepicker.addListener("onSelect", [
-  (data) => {
-    console.log(data);
-  },
-  () => {
-    console.log("another callback");
-  },
-]);
-
-datepicker.addListener("onChange", function (data) {
-  console.log(data);
-});
