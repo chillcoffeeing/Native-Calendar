@@ -1,0 +1,10 @@
+{
+    "arrowParens": "always",
+    "printWidth": 120,
+    "endOfLine": "crlf",
+    "proseWrap": "always",
+    "quoteProps": "as-needed",
+    "singleQuote": true,
+    "semi": false,
+    "tabWidth": 4
+}

@@ -5,15 +5,33 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="../dist/css/n-calendar.css">
+    <link rel="stylesheet" href="/assets/css/native-calendar.css">
 </head>
 <body>
-    <div id="app"></div>
-    <script src="../dist/n-calendar.umd.js"></script>
+    <div class="app">
+        <div id="calendar"></div>
+    </div>
+    <script src="/native-calendar.umd.js"></script>
     <script>
-        const datepicker = new NativeCalendar(document.querySelector("#app"), {
-            firstWeekDay: "monday"
-        })
+        const calendarRoot = document.querySelector("#calendar");
+
+        const instanceOptions = { firstWeekDay: "sunday" }
+
+        const calendar = new NativeCalendar(calendarRoot, instanceOptions);
     </script>
+    <style>
+        html {
+            height: 100%;
+            background-color: #535353;
+        }
+        .app {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%);
+            width: 280px;
+            font-family: sans-serif;
+        }
+    </style>
 </body>
 </html>

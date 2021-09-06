@@ -1,0 +1,192 @@
+*,
+*::after,
+*::before {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+$box-height: 23px;
+$light-hover: #cfcfcf;
+
+.ndp-input-box {
+    overflow: hidden;
+    padding: 5px 10px;
+    border-radius: 4px;
+    box-shadow: 1px 2px 5px #000;
+    border: 1px solid #dfdfdf;
+    background-color: #fff;
+    width: 100%;
+
+    .ndp-input-wrapper {
+        display: inline-block;
+    }
+    .ndp-input-element {
+        font-family: monospace;
+        display: block;
+        border: none;
+        min-height: $box-height;
+        font-size: 2ch;
+    }
+    .ndp-input-element:focus {
+        outline: none;
+    }
+    .ndp-input-wrapper:not(:last-of-type) {
+        position: relative;
+        margin-right: 8px;
+    }
+    .ndp-input-wrapper:not(:last-of-type)::after {
+        content: '/';
+        color: gray;
+        vertical-align: middle;
+        position: absolute;
+        top: 50%;
+        right: -6px;
+        transform: translateY(-50%);
+    }
+    .ndp-input-year {
+        max-width: 32px;
+    }
+
+    .ndp-input-date,
+    .ndp-input-month {
+        max-width: 16px;
+    }
+
+    .ndp-toggle-button {
+        position: relative;
+        cursor: pointer;
+        display: block;
+        border: 1px solid #dfdfdf;
+        position: absolute;
+        border: none;
+        border-radius: 0;
+        top: 1px;
+        right: 1px;
+        bottom: 1px;
+        border-top-right-radius: 6px;
+        border-bottom-right-radius: 6px;
+        width: 40px;
+    }
+
+    .ndp-toggle-button::before {
+        content: '';
+        display: block;
+        width: 25px;
+        height: 25px;
+        background-image: url('../images/calendar.png');
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: contain;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+}
+
+.ndp-dropdown {
+    display: block;
+    padding: 10px;
+    position: absolute;
+    background-color: #fff;
+    border-radius: 4px;
+    box-shadow: 1px 2px 5px #000;
+    border: 1px solid #dfdfdf;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+
+    .ndp-controls-container {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .ndp-controls-container > *:not(:first-child) {
+        margin-left: 5px;
+    }
+    .ndp-list {
+        list-style: none;
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        text-transform: capitalize;
+    }
+
+    .ndp-cell {
+        margin: 1px;
+        padding: 1px;
+        border-width: 2px;
+        border-style: solid;
+        border-color: transparent;
+        text-align: center;
+        border-radius: 4px;
+        font-size: 15px;
+        transition: background-color 0.1s linear, border-color 0.1s linear;
+    }
+
+    .ndp-clickable:hover {
+        background-color: $light-hover;
+        border-color: $light-hover;
+        color: #000;
+        cursor: pointer;
+    }
+
+    .ndp-prev-month-button,
+    .ndp-next-month-button,
+    .ndp-month-button,
+    .ndp-year-button {
+        cursor: pointer;
+        padding: 5px;
+        background-color: white;
+        border-radius: 4px;
+        border: 1px solid #e1e1e1;
+    }
+    .ndp-month-button,
+    .ndp-year-button {
+        flex-grow: 1;
+        border: unset;
+    }
+
+    .ndp-today-date {
+        border-color: #bbbbbb;
+    }
+
+    .prev-date,
+    .next-date {
+        background-color: #e1e1e1;
+        color: #535353;
+        border: 2px solid #e1e1e1;
+    }
+
+    .ndp-date-active {
+        background-color: #613efa;
+        color: #ffffff;
+        border-color: #613efa;
+    }
+    .ndp-prev-month-button,
+    .ndp-next-month-button {
+        position: relative;
+        width: 26px;
+        height: 26px;
+    }
+
+    .ndp-prev-month-button::before,
+    .ndp-next-month-button::before {
+        content: '';
+        display: block;
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        top: 6px;
+        left: 6px;
+        background-size: contain;
+        background-position: center;
+    }
+
+    .ndp-prev-month-button::before {
+        background-image: url('../images/left-arrow.png');
+    }
+    .ndp-next-month-button::before {
+        background-image: url('../images/right-arrow.png');
+    }
+}

@@ -1,3 +1,3 @@
-import "./scss/style.scss"
-import NativeCalendar from "./classes/dom";
-export default NativeCalendar;
+import './assets/scss/native-calendar-styles.scss'
+import NativeCalendar from './classes/native-calendar-dom'
+export default NativeCalendar
