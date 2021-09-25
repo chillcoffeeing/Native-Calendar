@@ -1,5 +1,5 @@
 {
-  "name": "native-datepicker",
+  "name": "native-calendar",
   "version": "1.0.0",
   "description": "",
   "main": "dist/native-calendar.cjs.js",

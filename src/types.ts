@@ -48,7 +48,12 @@ export type DropdownBuilderObject = {
             }
         }
         dates: {
-            $el: HTMLDivElement
+            $el: HTMLDivElement,
+            content: {
+                list: {
+                    $el: HTMLUListElement
+                }
+            }
         }
     }
 }
@@ -81,7 +86,6 @@ export interface DateState {
     initialDate: Date
     year: number
     month: number
-    weekDay: number
     monthDay: number
     firstDayToWeekDayNum: number
     lastDayToWeekDayNum: number

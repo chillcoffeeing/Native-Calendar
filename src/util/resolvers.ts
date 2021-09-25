@@ -31,3 +31,31 @@ export const calcMonthTotalDays = (date: Date): number => {
         ? 31
         : 30
 }
+
+export const parseHash = (hash: string): { data: { year: string; month: string; date: string }; hash: string } => {
+    const [year, month, date] = hash.split('/')
+    return {
+        data: {
+            year,
+            month,
+            date,
+        },
+        hash,
+    }
+}
+
+export const serializeHash = (dateParam: Date | number): string => {
+    const date = new Date(dateParam)
+
+    return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`
+}
+
+export const isToday = (date: Date): boolean => {
+    const now = new Date()
+
+    return (
+        date.getDate() === now.getDate() &&
+        date.getMonth() === now.getMonth() &&
+        date.getFullYear() === now.getFullYear()
+    )
+}

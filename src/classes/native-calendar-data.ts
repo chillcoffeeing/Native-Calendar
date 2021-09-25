@@ -9,50 +9,53 @@ export default abstract class NativeCalendarData {
 
     protected locale: LocaleOptions
 
-    protected calendarBaseDate: Date
+    protected coreState: {
+        current: DateState,
+        next: DateState,
+        prev: DateState
+    }
 
     constructor(options?: InstanceOptions) {
         this.firstDayOfWeek = options?.firstWeekDay || 'monday'
 
         this.locale = options?.locale || es
 
-        this.calendarBaseDate = new Date()
+        this.coreState = {
+            current: this.generateDateState(),
+            next: this.generateDateState(calcMonthDate(new Date, true)),
+            prev: this.generateDateState(calcMonthDate(new Date, false))
+        }
     }
 
-    protected get coreState(): {
-        current: DateState
-        next: DateState
-        prev: DateState
-    } {
-        return {
-            current: this.generateDateState(this.calendarBaseDate),
-            next: this.generateDateState(calcMonthDate(this.calendarBaseDate, true)),
-            prev: this.generateDateState(calcMonthDate(this.calendarBaseDate, false)),
+    set updateCoreState(date: Date) {
+        this.coreState = {
+            current: this.generateDateState(date),
+            next: this.generateDateState(calcMonthDate(date, true)),
+            prev: this.generateDateState(calcMonthDate(date, false))
         }
     }
 
     protected generateDateState(date?: string | number | Date): DateState {
-        const dateInit = date ? (date instanceof Date ? date : new Date(date)) : new Date()
+        const dateInit = date ? new Date(date) : new Date()
+
+        const firstDay = new Date(new Date(dateInit).setDate(1))
+
+        const lastDay = new Date(new Date(dateInit).setDate(calcMonthTotalDays(dateInit)))
 
         return {
             initialDate: dateInit,
 
-            weekDay: calcWeekDayNum(this.firstDayOfWeek, dateInit.getDay()),
-
             monthDay: dateInit.getDate(),
 
-            month: dateInit.getMonth() + 1,
+            month: dateInit.getMonth(),
 
             year: dateInit.getFullYear(),
 
             daysCount: calcMonthTotalDays(dateInit),
 
-            firstDayToWeekDayNum: calcWeekDayNum(this.firstDayOfWeek, new Date(new Date(dateInit).setDate(1)).getDay()),
+            firstDayToWeekDayNum: calcWeekDayNum(this.firstDayOfWeek, firstDay.getDay()),
 
-            lastDayToWeekDayNum: calcWeekDayNum(
-                this.firstDayOfWeek,
-                new Date(new Date(dateInit).setDate(calcMonthTotalDays(dateInit))).getDay()
-            ),
+            lastDayToWeekDayNum: calcWeekDayNum(this.firstDayOfWeek, lastDay.getDay()),
         }
     }
 }

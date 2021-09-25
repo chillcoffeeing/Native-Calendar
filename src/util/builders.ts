@@ -1,4 +1,5 @@
 import { DateState, DropdownBuilderObject, InputBoxBuilderObject, LocaleOptions, DOMState } from '../types'
+import { isToday, serializeHash } from './resolvers'
 
 const builder = <T extends keyof HTMLElementTagNameMap>(ElementOptions: {
     tag: T
@@ -33,17 +34,38 @@ export const inputBuilder = (): InputBoxBuilderObject => {
 
     const $inputDate = builder({
         tag: 'input',
-        attrs: { class: 'ndp-input-element ndp-input-date', value: 'dd', 'data-type': 'date' },
+        attrs: {
+            class: 'ndp-input-element ndp-input-date',
+            type: 'text',
+            placeholder: 'dd',
+            maxlength: '2',
+            inputmode: 'numeric',
+            'data-type': 'date',
+        },
     })
 
     const $inputMonth = builder({
         tag: 'input',
-        attrs: { class: 'ndp-input-element ndp-input-month', value: 'mm', 'data-type': 'month' },
+        attrs: {
+            class: 'ndp-input-element ndp-input-month',
+            type: 'text',
+            placeholder: 'mm',
+            maxlength: '2',
+            inputmode: 'numeric',
+            'data-type': 'month',
+        },
     })
 
     const $inputYear = builder({
         tag: 'input',
-        attrs: { class: 'ndp-input-element ndp-input-year', value: 'yyyy', 'data-type': 'year' },
+        attrs: {
+            class: 'ndp-input-element ndp-input-year',
+            type: 'text',
+            placeholder: 'aaaa',
+            maxlength: '4',
+            inputmode: 'numeric',
+            'data-type': 'year',
+        },
     })
 
     const $inputBox = builder({
@@ -114,15 +136,17 @@ export const dropdownBuilder = (
         innerContent: [$controlsContainer, $daysContainer],
     })
 
+    const $dates = datesCellsBuilder({
+        current: states.current,
+        next: states.next,
+        prev: states.prev,
+        dom: states.dom,
+    })
+
     const $datesContainer = builder({
         tag: 'div',
         attrs: { class: 'ndp-dates-container' },
-        innerContent: datesCellsBuilder({
-            current: states.current,
-            next: states.next,
-            prev: states.prev,
-            dom: states.dom,
-        }),
+        innerContent: $dates,
     })
 
     const $dropdown = builder({
@@ -161,6 +185,11 @@ export const dropdownBuilder = (
             },
             dates: {
                 $el: $datesContainer,
+                content: {
+                    list: {
+                        $el: $dates,
+                    },
+                },
             },
         },
     }
@@ -184,17 +213,12 @@ export const datesCellsBuilder = (states: {
 }): HTMLUListElement => {
     let i = 1
 
-    const now = new Date()
-
     const currentDates = []
 
     while (i <= states.current.daysCount) {
-        const hash = `${states.current.year}/${states.current.month}/${i}`
+        const hash = serializeHash(states.current.initialDate.setDate(i))
 
-        const today =
-            i === now.getDate() &&
-            states.current.month === now.getMonth() + 1 &&
-            states.current.year === now.getFullYear()
+        const today = isToday(states.current.initialDate)
 
         currentDates.push(
             builder({
@@ -228,19 +252,19 @@ export const datesCellsBuilder = (states: {
     return $dates
 }
 
-export const prevMonthDatesCellsBuilder = (currentState: DateState, state: DateState): HTMLLIElement[] => {
+export const prevMonthDatesCellsBuilder = (currentState: DateState, prevState: DateState): HTMLLIElement[] => {
     const dates = []
+
+    const prevStateDate = new Date(prevState.initialDate)
 
     let firstDayOfCurrentMonth = currentState.firstDayToWeekDayNum
 
-    let totalDaysOfPrevMonth = state.daysCount
+    let totalDaysOfPrevMonth = prevState.daysCount
 
     while (firstDayOfCurrentMonth > 0) {
-        state.initialDate.setDate(totalDaysOfPrevMonth)
+        prevStateDate.setDate(totalDaysOfPrevMonth)
 
-        const hash = `${state.initialDate.getFullYear()}/${
-            state.initialDate.getMonth() + 1
-        }/${state.initialDate.getDate()}`
+        const hash = serializeHash(prevStateDate)
 
         dates.push(
             builder({
@@ -263,7 +287,7 @@ export const prevMonthDatesCellsBuilder = (currentState: DateState, state: DateS
 export const nextMonthDatesCellsBuilder = (currentState: DateState, nextState: DateState): HTMLLIElement[] => {
     const dates = []
 
-    const nextInitialDate = nextState.initialDate
+    const nextInitialDate = new Date(nextState.initialDate)
 
     let nextDayOfNextMonth = 1
 
@@ -274,7 +298,7 @@ export const nextMonthDatesCellsBuilder = (currentState: DateState, nextState: D
     while (lastDayOfCurrentMonth < weekDays) {
         nextInitialDate.setDate(nextDayOfNextMonth)
 
-        const hash = `${nextInitialDate.getFullYear()}/${nextInitialDate.getMonth() + 1}/${nextInitialDate.getDate()}`
+        const hash = serializeHash(nextInitialDate)
 
         dates.push(
             builder({

@@ -27,6 +27,8 @@ $light-hover: #cfcfcf;
         border: none;
         min-height: $box-height;
         font-size: 2ch;
+        user-select: none;
+        appearance: none;
     }
     .ndp-input-element:focus {
         outline: none;
@@ -40,17 +42,19 @@ $light-hover: #cfcfcf;
         color: gray;
         vertical-align: middle;
         position: absolute;
-        top: 50%;
+        top: 55%;
         right: -6px;
         transform: translateY(-50%);
     }
     .ndp-input-year {
-        max-width: 32px;
+        text-align: center;
+        max-width: 50px;
     }
 
     .ndp-input-date,
     .ndp-input-month {
-        max-width: 16px;
+        text-align: center;
+        max-width: 25px;
     }
 
     .ndp-toggle-button {

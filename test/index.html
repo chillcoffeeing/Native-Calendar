@@ -8,10 +8,11 @@
     <link rel="stylesheet" href="/assets/css/native-calendar.css">
 </head>
 <body>
+    <pre id="debugg"></pre>
     <div class="app">
         <div id="calendar"></div>
     </div>
-    <script src="/native-calendar.umd.js"></script>
+    <script src="/native-calendar.min.js"></script>
     <script>
         const calendarRoot = document.querySelector("#calendar");
 
@@ -23,6 +24,10 @@
         html {
             height: 100%;
             background-color: #535353;
+        }
+        #debugg {
+            color: #fff;
+            font-size: medium;
         }
         .app {
             position: absolute;
