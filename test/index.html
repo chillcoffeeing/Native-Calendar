@@ -1,42 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="/assets/css/native-calendar.css">
-</head>
-<body>
-    <pre id="debugg"></pre>
-    <div class="app">
-        <div id="calendar"></div>
-    </div>
-    <script src="/native-calendar.min.js"></script>
-    <script>
-        const calendarRoot = document.querySelector("#calendar");
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+        <link rel="stylesheet" href="/assets/css/native-calendar.css" />
+    </head>
+    <body>
+        <pre id="debugg"></pre>
+        <div class="app">
+            <div id="calendar"></div>
+        </div>
+        <script src="/native-calendar.min.js"></script>
+        <script>
+            const calendarRoot = document.querySelector('#calendar')
 
-        const instanceOptions = { firstWeekDay: "sunday" }
+            const instanceOptions = { firstWeekDay: 'monday' }
 
-        const calendar = new NativeCalendar(calendarRoot, instanceOptions);
-    </script>
-    <style>
-        html {
-            height: 100%;
-            background-color: #535353;
-        }
-        #debugg {
-            color: #fff;
-            font-size: medium;
-        }
-        .app {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%);
-            width: 280px;
-            font-family: sans-serif;
-        }
-    </style>
-</body>
+            const calendar = new NativeCalendar(calendarRoot, instanceOptions)
+        </script>
+        <style>
+            html {
+                height: 100%;
+                background-color: #535353;
+            }
+            .app {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%);
+                width: 280px;
+                font-family: sans-serif;
+            }
+        </style>
+    </body>
 </html>

@@ -10,20 +10,20 @@ export default abstract class NativeCalendarData {
     protected locale: LocaleOptions
 
     protected coreState: {
-        current: DateState,
-        next: DateState,
+        current: DateState
+        next: DateState
         prev: DateState
     }
 
     constructor(options?: InstanceOptions) {
-        this.firstDayOfWeek = options?.firstWeekDay || 'monday'
+        this.firstDayOfWeek = options?.firstWeekDay || 'sunday'
 
         this.locale = options?.locale || es
 
         this.coreState = {
             current: this.generateDateState(),
-            next: this.generateDateState(calcMonthDate(new Date, true)),
-            prev: this.generateDateState(calcMonthDate(new Date, false))
+            next: this.generateDateState(calcMonthDate(new Date(), true)),
+            prev: this.generateDateState(calcMonthDate(new Date(), false))
         }
     }
 
@@ -55,7 +55,7 @@ export default abstract class NativeCalendarData {
 
             firstDayToWeekDayNum: calcWeekDayNum(this.firstDayOfWeek, firstDay.getDay()),
 
-            lastDayToWeekDayNum: calcWeekDayNum(this.firstDayOfWeek, lastDay.getDay()),
+            lastDayToWeekDayNum: calcWeekDayNum(this.firstDayOfWeek, lastDay.getDay())
         }
     }
 }

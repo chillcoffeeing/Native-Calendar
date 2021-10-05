@@ -5,6 +5,7 @@
   "main": "dist/native-calendar.cjs.js",
   "module": "dist/native-calendar.esm.js",
   "browser": "dist/native-calendar.umd.js",
+  "types": "dist/types/index.d.ts",
   "dependencies": {},
   "devDependencies": {
     "@rollup/plugin-commonjs": "^20.0.0",

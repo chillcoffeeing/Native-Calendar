@@ -3,11 +3,8 @@ import { FirstWeekDay, UpdateMonthParam } from '../types'
 export const calcMonthDate = (date: Date, factor: UpdateMonthParam): Date => {
     let updatedDate: Date
 
-    if (typeof factor === 'number') {
-        updatedDate = new Date(new Date(date).setMonth(factor))
-    } else {
-        updatedDate = new Date(new Date(date).setMonth(date.getMonth() + (factor ? 1 : -1)))
-    }
+    if (typeof factor === 'number') updatedDate = new Date(new Date(date).setMonth(factor))
+    else updatedDate = new Date(new Date(date).setMonth(date.getMonth() + (factor ? 1 : -1)))
 
     return updatedDate
 }
@@ -38,9 +35,9 @@ export const parseHash = (hash: string): { data: { year: string; month: string; 
         data: {
             year,
             month,
-            date,
+            date
         },
-        hash,
+        hash
     }
 }
 

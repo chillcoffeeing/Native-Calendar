@@ -7,9 +7,9 @@
 }
 
 $box-height: 23px;
-$light-hover: #cfcfcf;
+$light-hover: #9b9b9b;
 
-.ndp-input-box {
+.nc-fields-box {
     overflow: hidden;
     padding: 5px 10px;
     border-radius: 4px;
@@ -18,46 +18,53 @@ $light-hover: #cfcfcf;
     background-color: #fff;
     width: 100%;
 
-    .ndp-input-wrapper {
+    &__field-wrapper {
         display: inline-block;
-    }
-    .ndp-input-element {
-        font-family: monospace;
-        display: block;
-        border: none;
-        min-height: $box-height;
-        font-size: 2ch;
-        user-select: none;
-        appearance: none;
-    }
-    .ndp-input-element:focus {
-        outline: none;
-    }
-    .ndp-input-wrapper:not(:last-of-type) {
-        position: relative;
-        margin-right: 8px;
-    }
-    .ndp-input-wrapper:not(:last-of-type)::after {
-        content: '/';
-        color: gray;
-        vertical-align: middle;
-        position: absolute;
-        top: 55%;
-        right: -6px;
-        transform: translateY(-50%);
-    }
-    .ndp-input-year {
-        text-align: center;
-        max-width: 50px;
+
+        &:not(:last-of-type) {
+            position: relative;
+            margin-right: 8px;
+
+            &::after {
+                content: '/';
+                color: gray;
+                vertical-align: middle;
+                position: absolute;
+                top: 55%;
+                right: -6px;
+                transform: translateY(-50%);
+            }
+        }
+
+        .nc-field {
+            font-family: monospace;
+            display: block;
+            border: none;
+            min-height: $box-height;
+            font-size: 2ch;
+            user-select: none;
+            appearance: none;
+
+            &--year {
+                text-align: center;
+                max-width: 50px;
+                &:focus {
+                    outline: none;
+                }
+            }
+
+            &--date,
+            &--month {
+                text-align: center;
+                max-width: 30px;
+                &:focus {
+                    outline: none;
+                }
+            }
+        }
     }
 
-    .ndp-input-date,
-    .ndp-input-month {
-        text-align: center;
-        max-width: 25px;
-    }
-
-    .ndp-toggle-button {
+    &__toggle-button {
         position: relative;
         cursor: pointer;
         display: block;
@@ -71,27 +78,27 @@ $light-hover: #cfcfcf;
         border-top-right-radius: 6px;
         border-bottom-right-radius: 6px;
         width: 40px;
-    }
 
-    .ndp-toggle-button::before {
-        content: '';
-        display: block;
-        width: 25px;
-        height: 25px;
-        background-image: url('../images/calendar.png');
-        background-position: center;
-        background-repeat: no-repeat;
-        background-size: contain;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
+        &::before {
+            content: '';
+            display: block;
+            width: 25px;
+            height: 25px;
+            background-image: url('../images/calendar.png');
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: contain;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
     }
 }
 
-.ndp-dropdown {
+.nc-dropdown {
     display: block;
-    padding: 10px;
+    padding: 6px;
     position: absolute;
     background-color: #fff;
     border-radius: 4px;
@@ -100,25 +107,41 @@ $light-hover: #cfcfcf;
     top: calc(100% + 4px);
     left: 0;
     right: 0;
-
-    .ndp-controls-container {
+    .nc-controls-container {
         display: flex;
         justify-content: space-between;
-    }
 
-    .ndp-controls-container > *:not(:first-child) {
-        margin-left: 5px;
+        > * {
+            &:not(:first-child) {
+                margin-left: 5px;
+            }
+        }
     }
-    .ndp-list {
+    .nc-date-picker-wrapper,
+    .nc-month-picker-wrapper {
+        padding-top: 6px;
+    }
+    .nc-month-list {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    .nc-list {
+        grid-template-columns: repeat(7, 1fr);
+    }
+    .nc-month-list,
+    .nc-list {
         list-style: none;
         display: grid;
-        grid-template-columns: repeat(7, 1fr);
         text-transform: capitalize;
     }
-
-    .ndp-cell {
-        margin: 1px;
+    .nc-cell {
         padding: 1px;
+    }
+    .nc-month-cell {
+        padding: 5px 1px;
+    }
+    .nc-cell,
+    .nc-month-cell {
+        margin: 1px;
         border-width: 2px;
         border-style: solid;
         border-color: transparent;
@@ -127,31 +150,29 @@ $light-hover: #cfcfcf;
         font-size: 15px;
         transition: background-color 0.1s linear, border-color 0.1s linear;
     }
-
-    .ndp-clickable:hover {
+    .nc-clickable:hover {
         background-color: $light-hover;
         border-color: $light-hover;
-        color: #000;
+        color: #fff;
         cursor: pointer;
     }
-
-    .ndp-prev-month-button,
-    .ndp-next-month-button,
-    .ndp-month-button,
-    .ndp-year-button {
+    .nc-prev-month-button,
+    .nc-next-month-button,
+    .nc-month-button,
+    .nc-year-button {
         cursor: pointer;
         padding: 5px;
         background-color: white;
         border-radius: 4px;
         border: 1px solid #e1e1e1;
     }
-    .ndp-month-button,
-    .ndp-year-button {
+    .nc-month-button,
+    .nc-year-button {
         flex-grow: 1;
         border: unset;
     }
 
-    .ndp-today-date {
+    .nc-today-date {
         border-color: #bbbbbb;
     }
 
@@ -162,20 +183,25 @@ $light-hover: #cfcfcf;
         border: 2px solid #e1e1e1;
     }
 
-    .ndp-date-active {
+    .disabled-date {
+        opacity: 0.5;
+    }
+
+    .nc-date-active,
+    .nc-month-active {
         background-color: #613efa;
         color: #ffffff;
         border-color: #613efa;
     }
-    .ndp-prev-month-button,
-    .ndp-next-month-button {
+    .nc-prev-month-button,
+    .nc-next-month-button {
         position: relative;
         width: 26px;
         height: 26px;
     }
 
-    .ndp-prev-month-button::before,
-    .ndp-next-month-button::before {
+    .nc-prev-month-button::before,
+    .nc-next-month-button::before {
         content: '';
         display: block;
         position: absolute;
@@ -187,10 +213,10 @@ $light-hover: #cfcfcf;
         background-position: center;
     }
 
-    .ndp-prev-month-button::before {
+    .nc-prev-month-button::before {
         background-image: url('../images/left-arrow.png');
     }
-    .ndp-next-month-button::before {
+    .nc-next-month-button::before {
         background-image: url('../images/right-arrow.png');
     }
 }

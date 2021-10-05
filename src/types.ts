@@ -1,12 +1,12 @@
 export type EventKey = 'onChange' | 'onSelect' | 'onEdit' | 'onCreated' | 'onMount' | 'onUnmount' | 'onContextChange'
 
-export type UpdateMonthParam = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | boolean
+export type UpdateMonthParam = number | boolean
 
 export type FirstWeekDay = 'sunday' | 'monday'
 
 export type ListenersMap = Map<EventKey, Set<HookCallback> | undefined>
 
-export type HookCallback = (data?: DateState | DOMState['currentSelected']) => void
+export type HookCallback = (data?: DateState | DomState['currentSelected']) => void
 
 export type LocaleOptions = {
     months: {
@@ -21,68 +21,30 @@ export type LocaleOptions = {
 
 export type DropdownBuilderObject = {
     $el: HTMLDivElement
-    content: {
-        navigation: {
-            $el: HTMLDivElement
-            content: {
-                controls: {
-                    $el: HTMLDivElement
-                    content: {
-                        prev: {
-                            $el: HTMLButtonElement
-                        }
-                        yearButton: {
-                            $el: HTMLButtonElement
-                        }
-                        monthButton: {
-                            $el: HTMLButtonElement
-                        }
-                        next: {
-                            $el: HTMLButtonElement
-                        }
-                    }
-                }
-                days: {
-                    $el: HTMLDivElement
-                }
-            }
-        }
-        dates: {
-            $el: HTMLDivElement,
-            content: {
-                list: {
-                    $el: HTMLUListElement
-                }
-            }
-        }
-    }
+    $navigationEl: HTMLDivElement
+    $controlsEl: HTMLDivElement
+    $prevMonthEl: HTMLButtonElement
+    $nextMonthEl: HTMLButtonElement
+    $inputYear: HTMLButtonElement
+    $inputMonth: HTMLButtonElement
+    $pickerBoxEl: HTMLDivElement
 }
 
 export type InputBoxBuilderObject = {
-    $el: HTMLDivElement
-    content: {
-        date: {
-            $el: HTMLInputElement
-        }
-        month: {
-            $el: HTMLInputElement
-        }
-        year: {
-            $el: HTMLInputElement
-        }
-        toggle: {
-            $el: HTMLButtonElement
-        }
-    }
+    $inputBox: HTMLDivElement
+    $inputDate: HTMLInputElement
+    $inputMonth: HTMLInputElement
+    $inputYear: HTMLInputElement
+    $dropdownToggle: HTMLButtonElement
 }
 
-export interface InstanceOptions {
+export type InstanceOptions = {
     firstWeekDay?: FirstWeekDay
     locale?: LocaleOptions
-    type?: DOMState['currentPicker']
+    type?: DomState['currentPicker']
 }
 
-export interface DateState {
+export type DateState = {
     initialDate: Date
     year: number
     month: number
@@ -92,8 +54,14 @@ export interface DateState {
     daysCount: number
 }
 
-export interface DOMState {
-    currentPicker: 'months' | 'years' | 'days'
+export type DomState = {
+    currentPicker: 'months' | 'years' | 'days' | 'time'
+    picker: {
+        date?: HTMLDivElement
+        month?: HTMLDivElement
+        time?: HTMLDivElement
+        years?: HTMLDivElement
+    }
     currentSelected: {
         date: Date
         hash: string

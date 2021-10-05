@@ -1,4 +1,12 @@
-import { inputBuilder, dropdownBuilder, datesCellsBuilder, refreshActiveCell } from '../util/builders'
+import {
+    fieldsBoxBuilder,
+    dropdownBuilder,
+    datesBuilder,
+    refreshActiveDate,
+    monthsPicker,
+    datePicker,
+    refreshActiveMonth
+} from '../util/builders'
 
 import NativeCalendarData from './native-calendar-data'
 
@@ -6,26 +14,24 @@ import {
     ListenersMap,
     EventKey,
     DateState,
-    DOMState,
+    DomState,
     HookCallback,
     InstanceOptions,
     DropdownBuilderObject,
-    InputBoxBuilderObject,
+    InputBoxBuilderObject
 } from '../types'
-import { parseHash } from '../util/resolvers'
+import { calcMonthDate, parseHash } from '../util/resolvers'
 
 export default class NativeCalendar extends NativeCalendarData {
     private Listeners: ListenersMap = new Map()
 
     private root: {
         $el: HTMLElement
-        content: {
-            field: InputBoxBuilderObject
-            dropdown: DropdownBuilderObject
-        }
+        field: InputBoxBuilderObject
+        dropdown: DropdownBuilderObject
     }
 
-    private DOMState: DOMState
+    private domState: DomState
 
     private fieldsState: {
         year: string | null
@@ -34,134 +40,141 @@ export default class NativeCalendar extends NativeCalendarData {
     } = {
         year: null,
         month: null,
-        date: null,
+        date: null
     }
 
     constructor(root: HTMLElement | string, options?: InstanceOptions) {
         super(options)
 
-        this.DOMState = {
+        this.domState = {
             currentPicker: 'days',
-
+            picker: {},
             currentSelected: {
                 date: this.coreState.current.initialDate,
                 hash: `${this.coreState.current.year}/${this.coreState.current.month + 1}/${
                     this.coreState.current.monthDay
-                }`,
-            },
+                }`
+            }
         }
 
         const rootElm = typeof root === 'string' ? (document.querySelector(root) as HTMLElement) : root
 
         this.root = {
             $el: rootElm,
-            content: {
-                field: inputBuilder(),
-                dropdown: dropdownBuilder({ ...this.coreState, dom: this.DOMState }, this.locale),
-            },
+            field: fieldsBoxBuilder(),
+            dropdown: dropdownBuilder({ ...this.coreState, dom: this.domState }, this.locale)
         }
 
-        this.fields.$date.addEventListener('keydown', (e) => this.keyboardHandler(e))
+        this.root.field.$inputDate.addEventListener('keydown', (e) => this.keyboardHandler(e))
 
-        this.fields.$month.addEventListener('keydown', (e) => this.keyboardHandler(e))
+        this.root.field.$inputMonth.addEventListener('keydown', (e) => this.keyboardHandler(e))
 
-        this.fields.$year.addEventListener('keydown', (e) => this.keyboardHandler(e))
+        this.root.field.$inputYear.addEventListener('keydown', (e) => this.keyboardHandler(e))
 
-        this.fields.$date.addEventListener('input', (e) => this.fieldsHandler(e as InputEvent))
+        this.root.field.$inputDate.addEventListener('input', (e) => this.fieldsHandler(e as InputEvent))
 
-        this.fields.$month.addEventListener('input', (e) => this.fieldsHandler(e as InputEvent))
+        this.root.field.$inputMonth.addEventListener('input', (e) => this.fieldsHandler(e as InputEvent))
 
-        this.fields.$year.addEventListener('input', (e) => this.fieldsHandler(e as InputEvent))
+        this.root.field.$inputYear.addEventListener('input', (e) => this.fieldsHandler(e as InputEvent))
 
-        this.controls.$next.addEventListener('click', () => (this.navigationHandler(true), this.refreshUI()))
+        this.root.dropdown.$nextMonthEl.addEventListener(
+            'click',
+            () => (this.navigationHandler(true), this.refreshUI())
+        )
 
-        this.controls.$prev.addEventListener('click', () => (this.navigationHandler(false), this.refreshUI()))
+        this.root.dropdown.$prevMonthEl.addEventListener(
+            'click',
+            () => (this.navigationHandler(false), this.refreshUI())
+        )
 
-        this.controls.$toggle.addEventListener('click', () => this.toggleHandler())
+        this.root.field.$dropdownToggle.addEventListener('click', () => this.toggleHandler())
 
-        this.dates.$container.addEventListener('click', (e) => this.selectHandler(e))
+        this.root.dropdown.$inputMonth.addEventListener('click', () => {
+            if (this.domState.currentPicker !== 'months') {
+                this.changePicker('months')
+            }
+        })
 
-        this.root.$el.appendChild(this.root.content.field.$el)
-    }
+        this.root.dropdown.$pickerBoxEl.addEventListener('click', (e) => this.selectHandler(e))
 
-    private get controls() {
-        return {
-            $next: this.root.content.dropdown.content.navigation.content.controls.content.next.$el,
-            $prev: this.root.content.dropdown.content.navigation.content.controls.content.prev.$el,
-            $month: this.root.content.dropdown.content.navigation.content.controls.content.monthButton.$el,
-            $year: this.root.content.dropdown.content.navigation.content.controls.content.yearButton.$el,
-            $toggle: this.root.content.field.content.toggle.$el,
-        }
-    }
+        this.root.$el.appendChild(this.root.field.$inputBox)
 
-    private get fields() {
-        return {
-            $month: this.root.content.field.content.month.$el,
-            $date: this.root.content.field.content.date.$el,
-            $year: this.root.content.field.content.year.$el,
-        }
-    }
+        if (!options?.type) {
+            this.domState.picker.date = datePicker(
+                { ...this.coreState, dom: this.domState },
+                this.locale,
+                this.firstDayOfWeek
+            )
 
-    private get dates() {
-        return {
-            $container: this.root.content.dropdown.content.dates.$el,
+            this.domState.picker.month = monthsPicker(this.locale, this.domState)
+
+            this.root.dropdown.$pickerBoxEl.appendChild(this.domState.picker.date)
         }
     }
 
-    private set updateFieldsState(state: { year?: string; date?: string; month?: string }) {
-        if (typeof state.year === 'string' && (/^\d{1,4}\/\d{1,2}\/\d{1,2}$/.test(state.year) || state.year === '')) {
-            this.fieldsState.year = state.year
-            this.fields.$year.value = state.year
+    private set updateFieldsState(values: { year?: string; date?: string; month?: string }) {
+        if ((typeof values.year === 'string' && /^\d{1,4}$/.test(values.year)) || values.year === '') {
+            this.fieldsState.year = values.year
+            this.root.field.$inputYear.value = values.year
         }
 
         if (
-            typeof state.month === 'string' &&
-            ((Number(state.month) > 0 && Number(state.month) <= 12 && /^\d{1,2}$/.test(state.month)) ||
-                state.month === '')
+            typeof values.month === 'string' &&
+            ((Number(values.month) > 0 && Number(values.month) <= 12 && /^\d{1,2}$/.test(values.month)) ||
+                values.month === '')
         ) {
-            this.fieldsState.month = state.month
-            this.fields.$month.value = state.month
+            this.fieldsState.month = values.month
+            this.root.field.$inputMonth.value = values.month
         }
 
         if (
-            typeof state.date === 'string' &&
-            ((Number(state.date) > 0 && Number(state.date) <= 31 && /^\d{1,2}$/.test(state.date)) || state.date === '')
+            typeof values.date === 'string' &&
+            ((Number(values.date) > 0 && Number(values.date) <= 31 && /^\d{1,2}$/.test(values.date)) ||
+                values.date === '')
         ) {
-            this.fieldsState.date = state.date
-            this.fields.$date.value = state.date
+            this.fieldsState.date = values.date
+            this.root.field.$inputDate.value = values.date
         }
 
-        const currentHash = parseHash(this.DOMState.currentSelected.hash)
+        const currentHash = parseHash(this.domState.currentSelected.hash)
 
         const newHash =
-            (state.year || currentHash.data.year) +
+            (values.year || currentHash.data.year) +
             '/' +
-            (state.month || currentHash.data.month) +
+            (values.month || currentHash.data.month) +
             '/' +
-            (state.date || currentHash.data.date)
+            (values.date || currentHash.data.date)
 
         if (/^\d{1,4}\/\d{1,2}\/\d{1,2}$/.test(newHash)) {
-            this.DOMState.currentSelected.hash = newHash
+            this.domState.currentSelected.hash = newHash
         }
     }
 
     private refreshUI(): void {
-        if (this.DOMState.currentPicker === 'days') {
-            this.controls.$month.textContent = this.locale.months[this.coreState.current.month].large
+        if (this.domState.currentPicker === 'days') {
+            this.root.dropdown.$inputMonth.textContent = this.locale.months[this.coreState.current.month].large
 
-            this.controls.$year.textContent = this.coreState.current.year.toString()
+            this.root.dropdown.$inputYear.textContent = this.coreState.current.year.toString()
 
-            const dates = datesCellsBuilder({ ...this.coreState, dom: this.DOMState })
+            const dates = datesBuilder({ ...this.coreState, dom: this.domState })
 
-            this.dates.$container.firstChild?.replaceWith(dates)
+            this.domState.picker.date?.lastChild?.replaceWith(dates)
         }
     }
 
     private toggleHandler(): void {
         if (this.root?.$el) {
-            if (!this.root.$el.contains(this.root.content.dropdown.$el))
-                this.root.$el.appendChild(this.root.content.dropdown.$el)
-            else this.root.$el.removeChild(this.root.content.dropdown.$el)
+            if (!this.root.$el.contains(this.root.dropdown.$el)) this.root.$el.appendChild(this.root.dropdown.$el)
+            else this.root.$el.removeChild(this.root.dropdown.$el)
+        }
+    }
+
+    private changePicker = (picker: DomState['currentPicker']) => {
+        this.domState.currentPicker = picker
+        if (picker === 'days') {
+            this.root.dropdown.$pickerBoxEl.firstChild?.replaceWith(this.domState.picker.date as HTMLDivElement)
+        } else if (picker === 'months') {
+            this.root.dropdown.$pickerBoxEl.firstChild?.replaceWith(this.domState.picker.month as HTMLDivElement)
         }
     }
 
@@ -226,9 +239,8 @@ export default class NativeCalendar extends NativeCalendarData {
                         : possibleValue
 
                 this.updateFieldsState = {
-                    [field]: newValue,
+                    [field]: newValue
                 }
-
                 if (isDate) {
                     this.updateCoreState = new Date(
                         new Date(this.coreState.current.initialDate).setDate(Number(newValue))
@@ -238,21 +250,23 @@ export default class NativeCalendar extends NativeCalendarData {
                         new Date(this.coreState.current.initialDate).setMonth(Number(newValue) - 1)
                     )
                 }
-
                 if (newValue.length > 1 || Number(newValue + '0') > maxValue) {
-                    isDate && this.fields.$month.focus()
-                    isMonth && this.fields.$year.focus()
+                    isDate && this.root.field.$inputMonth.focus()
+                    isMonth && this.root.field.$inputYear.focus()
                 }
             } else if (field === 'year') {
                 this.updateFieldsState = {
-                    [field]: ref.value,
+                    [field]: ref.value
                 }
                 this.updateCoreState = new Date(
                     new Date(this.coreState.current.initialDate).setFullYear(Number(ref.value))
                 )
             }
             if (field === 'date') {
-                refreshActiveCell(this.dates.$container.firstChild as HTMLUListElement, this.DOMState)
+                refreshActiveDate(
+                    this.root.dropdown.$pickerBoxEl.firstChild?.lastChild as HTMLUListElement,
+                    this.domState
+                )
             } else {
                 this.refreshUI()
             }
@@ -262,26 +276,51 @@ export default class NativeCalendar extends NativeCalendarData {
     }
 
     private selectHandler(e: MouseEvent) {
-        const target = e?.target as HTMLElement
+        if (this.domState.currentPicker === 'days') {
+            const target = e?.target as HTMLElement
 
-        const info = !!target.dataset?.info && parseHash(target.dataset.info)
+            const info = !!target.dataset?.info && parseHash(target.dataset.info)
 
-        if (info) {
-            this.DOMState.currentSelected.hash = info.hash
+            if (info) {
+                this.domState.currentSelected.hash = info.hash
 
-            if (/next-date/.test(target.className)) this.navigationHandler(true)
-            else if (/prev-date/.test(target.className)) this.navigationHandler(false)
-            else refreshActiveCell(this.dates.$container.firstChild as HTMLUListElement, this.DOMState)
+                if (/next-date/.test(target.className)) this.navigationHandler(true)
+                else if (/prev-date/.test(target.className)) this.navigationHandler(false)
+                else refreshActiveDate(this.root.dropdown.$pickerBoxEl.lastChild as HTMLUListElement, this.domState)
 
-            this.updateFieldsState = info.data
+                this.updateFieldsState = info.data
 
-            this.refreshUI()
+                this.toggleHandler()
 
-            this.eventTrigger('onSelect', this.DOMState.currentSelected)
+                this.refreshUI()
+
+                this.eventTrigger('onSelect', this.domState.currentSelected)
+            }
+        } else if (this.domState.currentPicker === 'months') {
+            const target = e.target as HTMLElement
+
+            const info = target.dataset?.info
+
+            if (info) {
+                this.updateCoreState = calcMonthDate(this.coreState.current.initialDate, Number(info))
+
+                this.updateFieldsState = {
+                    month: (Number(info) + 1).toString()
+                }
+
+                refreshActiveMonth(
+                    this.domState.picker.month?.querySelector('.nc-month-list') as HTMLUListElement,
+                    this.domState
+                )
+
+                this.changePicker('days')
+
+                this.refreshUI()
+            }
         }
     }
 
-    private eventTrigger(event: EventKey, data: DateState | DOMState['currentSelected']) {
+    private eventTrigger(event: EventKey, data: DateState | DomState['currentSelected']) {
         this.Listeners.get(event)?.forEach((callback) => callback(data))
     }
 

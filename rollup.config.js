@@ -13,33 +13,33 @@ export default {
         {
             file: pkg.main,
             format: 'cjs',
-            exports: 'default',
+            exports: 'default'
         },
         {
             file: pkg.module,
             format: 'es',
-            exports: 'default',
+            exports: 'default'
         },
         {
             file: pkg.browser,
             format: 'umd',
             exports: 'default',
-            name: 'NativeCalendar',
+            name: 'NativeCalendar'
         },
         {
             file: 'dist/native-calendar.min.js',
             format: 'iife',
             exports: 'default',
             name: 'NativeCalendar',
-            plugins: [terser()],
-        },
+            plugins: [terser()]
+        }
     ],
     plugins: [
         scss({
-            output: 'dist/assets/css/native-calendar.css',
+            output: 'dist/assets/css/native-calendar.css'
         }),
         typescript({
-            tsconfig: './tsconfig.json',
+            tsconfig: './tsconfig.json'
         }),
         nodeResolve(),
         commonjs(),
@@ -47,15 +47,15 @@ export default {
             targets: [
                 {
                     src: 'src/assets/images/**/*',
-                    dest: 'dist/assets/images',
-                },
-            ],
+                    dest: 'dist/assets/images'
+                }
+            ]
         }),
         serve({
             open: true,
             host: 'localhost',
             port: 80,
-            contentBase: ['test', 'dist'],
-        }),
-    ],
+            contentBase: ['test', 'dist']
+        })
+    ]
 }

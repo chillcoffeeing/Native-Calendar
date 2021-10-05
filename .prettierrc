@@ -4,6 +4,7 @@
     "endOfLine": "crlf",
     "proseWrap": "always",
     "quoteProps": "as-needed",
+    "trailingComma": "none",
     "singleQuote": true,
     "semi": false,
     "tabWidth": 4

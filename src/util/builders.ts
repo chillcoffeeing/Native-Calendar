@@ -1,5 +1,12 @@
-import { DateState, DropdownBuilderObject, InputBoxBuilderObject, LocaleOptions, DOMState } from '../types'
-import { isToday, serializeHash } from './resolvers'
+import {
+    DateState,
+    DropdownBuilderObject,
+    InputBoxBuilderObject,
+    LocaleOptions,
+    DomState,
+    FirstWeekDay
+} from '../types'
+import { isToday, parseHash, serializeHash } from './resolvers'
 
 const builder = <T extends keyof HTMLElementTagNameMap>(ElementOptions: {
     tag: T
@@ -29,196 +36,152 @@ const builder = <T extends keyof HTMLElementTagNameMap>(ElementOptions: {
     return $element
 }
 
-export const inputBuilder = (): InputBoxBuilderObject => {
-    const $dropdownToggle = builder({ tag: 'button', attrs: { class: 'ndp-toggle-button' } })
+export const fieldsBoxBuilder = (): InputBoxBuilderObject => {
+    const $dropdownToggle = builder({ tag: 'button', attrs: { class: 'nc-fields-box__toggle-button' } })
 
     const $inputDate = builder({
         tag: 'input',
         attrs: {
-            class: 'ndp-input-element ndp-input-date',
+            class: 'nc-field nc-field--date',
             type: 'text',
             placeholder: 'dd',
             maxlength: '2',
             inputmode: 'numeric',
-            'data-type': 'date',
-        },
+            'data-type': 'date'
+        }
     })
 
     const $inputMonth = builder({
         tag: 'input',
         attrs: {
-            class: 'ndp-input-element ndp-input-month',
+            class: 'nc-field nc-field--month',
             type: 'text',
             placeholder: 'mm',
             maxlength: '2',
             inputmode: 'numeric',
-            'data-type': 'month',
-        },
+            'data-type': 'month'
+        }
     })
 
     const $inputYear = builder({
         tag: 'input',
         attrs: {
-            class: 'ndp-input-element ndp-input-year',
+            class: 'nc-field nc-field--year',
             type: 'text',
             placeholder: 'aaaa',
             maxlength: '4',
             inputmode: 'numeric',
-            'data-type': 'year',
-        },
+            'data-type': 'year'
+        }
     })
 
     const $inputBox = builder({
         tag: 'div',
-        attrs: { class: 'ndp-input-box' },
+        attrs: { class: 'nc-fields-box' },
         innerContent: [
-            builder({ tag: 'span', attrs: { class: 'ndp-input-wrapper' }, innerContent: $inputDate }),
-            builder({ tag: 'span', attrs: { class: 'ndp-input-wrapper' }, innerContent: $inputMonth }),
-            builder({ tag: 'span', attrs: { class: 'ndp-input-wrapper' }, innerContent: $inputYear }),
-            $dropdownToggle,
-        ],
+            builder({ tag: 'span', attrs: { class: 'nc-fields-box__field-wrapper' }, innerContent: $inputDate }),
+            builder({ tag: 'span', attrs: { class: 'nc-fields-box__field-wrapper' }, innerContent: $inputMonth }),
+            builder({ tag: 'span', attrs: { class: 'nc-fields-box__field-wrapper' }, innerContent: $inputYear }),
+            $dropdownToggle
+        ]
     })
 
     return {
-        $el: $inputBox,
-        content: {
-            date: {
-                $el: $inputDate,
-            },
-            month: {
-                $el: $inputMonth,
-            },
-            year: {
-                $el: $inputYear,
-            },
-            toggle: {
-                $el: $dropdownToggle,
-            },
-        },
+        $inputBox,
+        $inputDate,
+        $inputMonth,
+        $inputYear,
+        $dropdownToggle
     }
 }
 
 export const dropdownBuilder = (
-    states: { current: DateState; next: DateState; prev: DateState; dom: DOMState },
+    states: { current: DateState; next: DateState; prev: DateState; dom: DomState },
     locale: LocaleOptions
 ): DropdownBuilderObject => {
-    const $prev = builder({ tag: 'button', attrs: { class: 'ndp-prev-month-button ndp-clickable' } })
+    const $prev = builder({ tag: 'button', attrs: { class: 'nc-prev-month-button nc-clickable' } })
 
-    const $next = builder({ tag: 'button', attrs: { class: 'ndp-next-month-button ndp-clickable' } })
+    const $next = builder({ tag: 'button', attrs: { class: 'nc-next-month-button nc-clickable' } })
 
     const $monthButton = builder({
         tag: 'button',
-        attrs: { class: 'ndp-month-button ndp-clickable' },
-        innerContent: locale.months[states.current.month].large,
+        attrs: { class: 'nc-month-button nc-clickable' },
+        innerContent: locale.months[states.current.month].large
     })
 
     const $yearButton = builder({
         tag: 'button',
-        attrs: { class: 'ndp-year-button ndp-clickable' },
-        innerContent: states.current.year.toString(),
+        attrs: { class: 'nc-year-button nc-clickable' },
+        innerContent: states.current.year.toString()
     })
 
     const $controlsContainer = builder({
         tag: 'div',
-        attrs: { class: 'ndp-controls-container' },
-        innerContent: [$prev, $yearButton, $monthButton, $next],
-    })
-
-    const $daysContainer = builder({
-        tag: 'div',
-        attrs: { class: 'ndp-days-container' },
-        innerContent: daysCells(locale),
+        attrs: { class: 'nc-controls-container' },
+        innerContent: [$prev, $yearButton, $monthButton, $next]
     })
 
     const $navigationPanel = builder({
         tag: 'div',
-        attrs: { class: 'ndp-navigation-container' },
-        innerContent: [$controlsContainer, $daysContainer],
+        attrs: { class: 'nc-navigation-container' },
+        innerContent: [$controlsContainer]
     })
 
-    const $dates = datesCellsBuilder({
-        current: states.current,
-        next: states.next,
-        prev: states.prev,
-        dom: states.dom,
-    })
-
-    const $datesContainer = builder({
+    const $pickerBox = builder({
         tag: 'div',
-        attrs: { class: 'ndp-dates-container' },
-        innerContent: $dates,
+        attrs: { class: 'nc-dates-container' }
     })
 
     const $dropdown = builder({
         tag: 'div',
-        attrs: { class: 'ndp-dropdown' },
-        innerContent: [$navigationPanel, $datesContainer],
+        attrs: { class: 'nc-dropdown' },
+        innerContent: [$navigationPanel, $pickerBox]
     })
 
     return {
         $el: $dropdown,
-        content: {
-            navigation: {
-                $el: $navigationPanel,
-                content: {
-                    controls: {
-                        $el: $controlsContainer,
-                        content: {
-                            prev: {
-                                $el: $prev,
-                            },
-                            yearButton: {
-                                $el: $yearButton,
-                            },
-                            monthButton: {
-                                $el: $monthButton,
-                            },
-                            next: {
-                                $el: $next,
-                            },
-                        },
-                    },
-                    days: {
-                        $el: $daysContainer,
-                    },
-                },
-            },
-            dates: {
-                $el: $datesContainer,
-                content: {
-                    list: {
-                        $el: $dates,
-                    },
-                },
-            },
-        },
+        $navigationEl: $navigationPanel,
+        $controlsEl: $controlsContainer,
+        $prevMonthEl: $prev,
+        $nextMonthEl: $next,
+        $inputYear: $yearButton,
+        $inputMonth: $monthButton,
+        $pickerBoxEl: $pickerBox
     }
 }
 
-export const daysCells = (locale: LocaleOptions): HTMLUListElement => {
+export const daysBuilder = (locale: LocaleOptions, firstWeekDay: FirstWeekDay): HTMLUListElement => {
+    const days = locale.days.map((day) => {
+        return builder({ tag: 'li', attrs: { class: 'nc-cell' }, innerContent: day.short })
+    })
+
+    const sunday = days.shift()
+
+    days[firstWeekDay === 'sunday' ? 'unshift' : 'push'](sunday as HTMLLIElement)
+
     return builder({
         tag: 'ul',
-        attrs: { class: 'ndp-list' },
-        innerContent: locale.days.map((day) => {
-            return builder({ tag: 'li', attrs: { class: 'ndp-cell' }, innerContent: day.short })
-        }),
+        attrs: { class: 'nc-list' },
+        innerContent: days
     })
 }
 
-export const datesCellsBuilder = (states: {
+export const datesBuilder = (states: {
     current: DateState
     next: DateState
     prev: DateState
-    dom: DOMState
+    dom: DomState
 }): HTMLUListElement => {
     let i = 1
 
     const currentDates = []
 
-    while (i <= states.current.daysCount) {
-        const hash = serializeHash(states.current.initialDate.setDate(i))
+    const currentDate = new Date(states.current.initialDate)
 
-        const today = isToday(states.current.initialDate)
+    while (i <= states.current.daysCount) {
+        const hash = serializeHash(currentDate.setDate(i))
+
+        const today = isToday(currentDate)
 
         currentDates.push(
             builder({
@@ -226,33 +189,33 @@ export const datesCellsBuilder = (states: {
                 attrs: {
                     'data-info': hash,
                     title: hash,
-                    class: 'ndp-cell ndp-clickable' + (today ? ' ndp-today-date' : ''),
+                    class: 'nc-cell nc-clickable' + (today ? ' nc-today-date' : '')
                 },
-                innerContent: i.toString(),
+                innerContent: i.toString()
             })
         )
 
         i++
     }
 
-    const prevDates = prevMonthDatesCellsBuilder(states.current, states.prev)
+    const prevDates = prevDatesBuilder(states.current, states.prev)
 
-    const nextDates = nextMonthDatesCellsBuilder(states.current, states.next)
+    const nextDates = nextDatesBuilder(states.current, states.next)
 
     const $dates = builder({
         tag: 'ul',
         attrs: {
-            class: 'ndp-list',
+            class: 'nc-list'
         },
-        innerContent: [...prevDates, ...currentDates, ...nextDates],
+        innerContent: [...prevDates, ...currentDates, ...nextDates]
     })
 
-    refreshActiveCell($dates, states.dom)
+    refreshActiveDate($dates, states.dom)
 
     return $dates
 }
 
-export const prevMonthDatesCellsBuilder = (currentState: DateState, prevState: DateState): HTMLLIElement[] => {
+export const prevDatesBuilder = (currentState: DateState, prevState: DateState): HTMLLIElement[] => {
     const dates = []
 
     const prevStateDate = new Date(prevState.initialDate)
@@ -272,9 +235,9 @@ export const prevMonthDatesCellsBuilder = (currentState: DateState, prevState: D
                 attrs: {
                     'data-info': hash,
                     title: hash,
-                    class: 'ndp-cell ndp-clickable prev-date',
+                    class: 'nc-cell nc-clickable prev-date'
                 },
-                innerContent: totalDaysOfPrevMonth.toString(),
+                innerContent: totalDaysOfPrevMonth.toString()
             })
         )
 
@@ -284,7 +247,7 @@ export const prevMonthDatesCellsBuilder = (currentState: DateState, prevState: D
     return dates.reverse()
 }
 
-export const nextMonthDatesCellsBuilder = (currentState: DateState, nextState: DateState): HTMLLIElement[] => {
+export const nextDatesBuilder = (currentState: DateState, nextState: DateState): HTMLLIElement[] => {
     const dates = []
 
     const nextInitialDate = new Date(nextState.initialDate)
@@ -306,9 +269,9 @@ export const nextMonthDatesCellsBuilder = (currentState: DateState, nextState: D
                 attrs: {
                     'data-info': hash,
                     title: hash,
-                    class: 'ndp-cell ndp-clickable next-date',
+                    class: 'nc-cell nc-clickable next-date'
                 },
-                innerContent: nextDayOfNextMonth.toString(),
+                innerContent: nextDayOfNextMonth.toString()
             })
         )
 
@@ -318,18 +281,84 @@ export const nextMonthDatesCellsBuilder = (currentState: DateState, nextState: D
     return dates
 }
 
-export const refreshActiveCell = (datesList: HTMLUListElement, DOMState: DOMState): void => {
-    const $children = datesList.childNodes
+export const refreshActiveDate = (datesList: HTMLUListElement, DOMState: DomState): void => {
+    datesList.childNodes?.forEach((children) => {
+        const li = children as HTMLLIElement
+        if (li.dataset?.info === DOMState.currentSelected.hash) li.classList.add('nc-date-active')
+        else li.classList.remove('nc-date-active')
+    })
+}
 
-    $children?.forEach((children) => {
+export const refreshActiveMonth = (datesList: HTMLUListElement, state: DomState): void => {
+    const {
+        data: { month: currentMonth }
+    } = parseHash(state.currentSelected.hash)
+
+    datesList.childNodes?.forEach((children) => {
         const li = children as HTMLLIElement
 
-        if (li.dataset?.info === DOMState.currentSelected.hash) {
-            li.classList.add('ndp-date-active')
+        if (li.dataset?.info === (Number(currentMonth) - 1).toString()) {
+            li.classList.add('nc-month-active')
         } else {
-            li.classList.remove('ndp-date-active')
+            li.classList.remove('nc-month-active')
         }
     })
+}
+
+export const datePicker = (
+    states: { current: DateState; next: DateState; prev: DateState; dom: DomState },
+    locale: LocaleOptions,
+    firstWeekDay: FirstWeekDay
+): HTMLDivElement => {
+    const $daysContainer = builder({
+        tag: 'div',
+        attrs: { class: 'nc-days-container' },
+        innerContent: daysBuilder(locale, firstWeekDay)
+    })
+
+    const $dates = datesBuilder({
+        current: states.current,
+        next: states.next,
+        prev: states.prev,
+        dom: states.dom
+    })
+
+    return builder({
+        tag: 'div',
+        attrs: {
+            class: 'nc-date-picker-wrapper'
+        },
+        innerContent: [$daysContainer, $dates]
+    })
+}
+
+export const monthsPicker = (locale: LocaleOptions, state: DomState): HTMLDivElement => {
+    const monthPicker = builder({
+        tag: 'div',
+        attrs: {
+            class: 'nc-month-picker-wrapper'
+        },
+        innerContent: builder({
+            tag: 'ul',
+            attrs: {
+                class: 'nc-month-list'
+            },
+            innerContent: locale.months.map((month, index) => {
+                return builder({
+                    tag: 'li',
+                    attrs: {
+                        class: 'nc-month-cell nc-clickable',
+                        'data-info': index.toString()
+                    },
+                    innerContent: month.large
+                })
+            })
+        })
+    })
+
+    refreshActiveMonth(monthPicker.querySelector('.nc-month-list') as HTMLUListElement, state)
+
+    return monthPicker
 }
 
 export default builder
