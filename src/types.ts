@@ -21,13 +21,28 @@ export type LocaleOptions = {
 
 export type DropdownBuilderObject = {
     $el: HTMLDivElement
-    $navigationEl: HTMLDivElement
-    $controlsEl: HTMLDivElement
-    $prevMonthEl: HTMLButtonElement
-    $nextMonthEl: HTMLButtonElement
-    $inputYear: HTMLButtonElement
-    $inputMonth: HTMLButtonElement
+    $navigationBoxEl: HTMLDivElement
     $pickerBoxEl: HTMLDivElement
+}
+
+export type DatepickerControlsBuilderObject = {
+    $el: HTMLDivElement
+    $prev: HTMLButtonElement
+    $next: HTMLButtonElement
+    $yearButton: HTMLButtonElement
+    $monthButton: HTMLButtonElement
+}
+
+export type YearPickerControlsBuilderObject = {
+    $el: HTMLDivElement
+    $prev: HTMLButtonElement
+    $next: HTMLButtonElement
+    $close: HTMLButtonElement
+}
+
+export type MonthPickerControlsBuilderObject = {
+    $el: HTMLDivElement
+    $close: HTMLButtonElement
 }
 
 export type InputBoxBuilderObject = {
@@ -55,12 +70,22 @@ export type DateState = {
 }
 
 export type DomState = {
-    currentPicker: 'months' | 'years' | 'days' | 'time'
+    currentPicker: 'months' | 'year' | 'days' | 'time'
     picker: {
-        date?: HTMLDivElement
-        month?: HTMLDivElement
+        date?: {
+            $el: HTMLDivElement
+            $controls: DatepickerControlsBuilderObject
+        }
+        month?: {
+            $el: HTMLDivElement
+            $controls: MonthPickerControlsBuilderObject
+        }
         time?: HTMLDivElement
-        years?: HTMLDivElement
+        year?: {
+            $el: HTMLDivElement
+            $controls: YearPickerControlsBuilderObject
+            initialYear: number
+        }
     }
     currentSelected: {
         date: Date

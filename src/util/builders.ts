@@ -4,7 +4,10 @@ import {
     InputBoxBuilderObject,
     LocaleOptions,
     DomState,
-    FirstWeekDay
+    FirstWeekDay,
+    DatepickerControlsBuilderObject,
+    YearPickerControlsBuilderObject,
+    MonthPickerControlsBuilderObject
 } from '../types'
 import { isToday, parseHash, serializeHash } from './resolvers'
 
@@ -95,10 +98,10 @@ export const fieldsBoxBuilder = (): InputBoxBuilderObject => {
     }
 }
 
-export const dropdownBuilder = (
+export const datePickerControlsBuilder = (
     states: { current: DateState; next: DateState; prev: DateState; dom: DomState },
     locale: LocaleOptions
-): DropdownBuilderObject => {
+): DatepickerControlsBuilderObject => {
     const $prev = builder({ tag: 'button', attrs: { class: 'nc-prev-month-button nc-clickable' } })
 
     const $next = builder({ tag: 'button', attrs: { class: 'nc-next-month-button nc-clickable' } })
@@ -121,10 +124,78 @@ export const dropdownBuilder = (
         innerContent: [$prev, $yearButton, $monthButton, $next]
     })
 
+    return {
+        $el: $controlsContainer,
+        $prev,
+        $next,
+        $monthButton,
+        $yearButton
+    }
+}
+
+export const yearPickerControlsBuilder = (state: DateState): YearPickerControlsBuilderObject => {
+    const prevYearsButton = builder({
+        tag: 'button',
+        attrs: {
+            class: 'nc-prev-years-button nc-clickable'
+        },
+        innerContent: (state.year - 16).toString() + ' - ' + (state.year - 1).toString()
+    })
+    const nextYearsButton = builder({
+        tag: 'button',
+        attrs: {
+            class: 'nc-next-years-button nc-clickable'
+        },
+        innerContent: (state.year + 16).toString() + ' - ' + (state.year + 31).toString()
+    })
+    const closeButton = builder({
+        tag: 'button',
+        attrs: {
+            class: 'nc-close-button nc-clickable'
+        }
+    })
+
+    const controlsContainer = builder({
+        tag: 'div',
+        attrs: {
+            class: 'nc-controls-container'
+        },
+        innerContent: [prevYearsButton, nextYearsButton, closeButton]
+    })
+
+    return {
+        $el: controlsContainer,
+        $prev: prevYearsButton,
+        $next: nextYearsButton,
+        $close: closeButton
+    }
+}
+
+export const monthPickerControlsBuilder = (): MonthPickerControlsBuilderObject => {
+    const closeButton = builder({
+        tag: 'button',
+        attrs: {
+            class: 'nc-close-button nc-clickable',
+            type: 'button'
+        }
+    })
+
+    return {
+        $el: builder({
+            tag: 'div',
+            attrs: {
+                class: 'nc-controls-container'
+            },
+            innerContent: [closeButton]
+        }),
+        $close: closeButton
+    }
+}
+
+export const dropdownBuilder = (): DropdownBuilderObject => {
     const $navigationPanel = builder({
         tag: 'div',
-        attrs: { class: 'nc-navigation-container' },
-        innerContent: [$controlsContainer]
+        attrs: { class: 'nc-navigation-container' }
     })
 
     const $pickerBox = builder({
@@ -140,12 +211,7 @@ export const dropdownBuilder = (
 
     return {
         $el: $dropdown,
-        $navigationEl: $navigationPanel,
-        $controlsEl: $controlsContainer,
-        $prevMonthEl: $prev,
-        $nextMonthEl: $next,
-        $inputYear: $yearButton,
-        $inputMonth: $monthButton,
+        $navigationBoxEl: $navigationPanel,
         $pickerBoxEl: $pickerBox
     }
 }
@@ -305,6 +371,22 @@ export const refreshActiveMonth = (datesList: HTMLUListElement, state: DomState)
     })
 }
 
+export const refreshActiveYear = (datesList: HTMLUListElement, state: DomState): void => {
+    const {
+        data: { year: currentYear }
+    } = parseHash(state.currentSelected.hash)
+
+    datesList.childNodes?.forEach((children) => {
+        const li = children as HTMLLIElement
+
+        if (li.dataset?.info === currentYear.toString()) {
+            li.classList.add('nc-year-active')
+        } else {
+            li.classList.remove('nc-year-active')
+        }
+    })
+}
+
 export const datePicker = (
     states: { current: DateState; next: DateState; prev: DateState; dom: DomState },
     locale: LocaleOptions,
@@ -359,6 +441,41 @@ export const monthsPicker = (locale: LocaleOptions, state: DomState): HTMLDivEle
     refreshActiveMonth(monthPicker.querySelector('.nc-month-list') as HTMLUListElement, state)
 
     return monthPicker
+}
+
+export const yearPicker = (year: number, domState: DomState): HTMLDivElement => {
+    const years: number[] = []
+
+    for (let i = year; i < year + 16; i++) {
+        years.push(i)
+    }
+
+    const yearPicker = builder({
+        tag: 'div',
+        attrs: {
+            class: 'nc-year-picker-wrapper'
+        },
+        innerContent: builder({
+            tag: 'ul',
+            attrs: {
+                class: 'nc-year-list'
+            },
+            innerContent: years.map((y) =>
+                builder({
+                    tag: 'li',
+                    attrs: {
+                        class: 'nc-year-cell nc-clickable',
+                        'data-info': y.toString()
+                    },
+                    innerContent: y.toString()
+                })
+            )
+        })
+    })
+
+    refreshActiveYear(yearPicker.querySelector('.nc-year-list') as HTMLUListElement, domState)
+
+    return yearPicker
 }
 
 export default builder

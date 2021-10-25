@@ -109,7 +109,8 @@ $light-hover: #9b9b9b;
     right: 0;
     .nc-controls-container {
         display: flex;
-        justify-content: space-between;
+        justify-content: end;
+        align-items: center;
 
         > * {
             &:not(:first-child) {
@@ -118,16 +119,21 @@ $light-hover: #9b9b9b;
         }
     }
     .nc-date-picker-wrapper,
+    .nc-year-picker-wrapper,
     .nc-month-picker-wrapper {
         padding-top: 6px;
     }
     .nc-month-list {
         grid-template-columns: repeat(3, 1fr);
     }
+    .nc-year-list {
+        grid-template-columns: repeat(4, 1fr);
+    }
     .nc-list {
         grid-template-columns: repeat(7, 1fr);
     }
     .nc-month-list,
+    .nc-year-list,
     .nc-list {
         list-style: none;
         display: grid;
@@ -136,10 +142,12 @@ $light-hover: #9b9b9b;
     .nc-cell {
         padding: 1px;
     }
-    .nc-month-cell {
+    .nc-month-cell,
+    .nc-year-cell {
         padding: 5px 1px;
     }
     .nc-cell,
+    .nc-year-cell,
     .nc-month-cell {
         margin: 1px;
         border-width: 2px;
@@ -159,7 +167,10 @@ $light-hover: #9b9b9b;
     .nc-prev-month-button,
     .nc-next-month-button,
     .nc-month-button,
-    .nc-year-button {
+    .nc-year-button,
+    .nc-close-button,
+    .nc-prev-years-button,
+    .nc-next-years-button {
         cursor: pointer;
         padding: 5px;
         background-color: white;
@@ -170,6 +181,10 @@ $light-hover: #9b9b9b;
     .nc-year-button {
         flex-grow: 1;
         border: unset;
+    }
+    .nc-prev-years-button,
+    .nc-next-years-button {
+        flex-grow: 1;
     }
 
     .nc-today-date {
@@ -188,20 +203,23 @@ $light-hover: #9b9b9b;
     }
 
     .nc-date-active,
+    .nc-year-active,
     .nc-month-active {
         background-color: #613efa;
         color: #ffffff;
         border-color: #613efa;
     }
     .nc-prev-month-button,
-    .nc-next-month-button {
+    .nc-next-month-button,
+    .nc-close-button {
         position: relative;
         width: 26px;
         height: 26px;
     }
 
     .nc-prev-month-button::before,
-    .nc-next-month-button::before {
+    .nc-next-month-button::before,
+    .nc-close-button::before {
         content: '';
         display: block;
         position: absolute;
@@ -213,10 +231,22 @@ $light-hover: #9b9b9b;
         background-position: center;
     }
 
+    .nc-close-button {
+        justify-self: end;
+    }
+
+    .nc-close-button::before {
+        background-image: url('../images/close.png');
+    }
     .nc-prev-month-button::before {
         background-image: url('../images/left-arrow.png');
     }
     .nc-next-month-button::before {
         background-image: url('../images/right-arrow.png');
+    }
+    .nc-close-button:hover::before,
+    .nc-prev-month-button:hover::before,
+    .nc-next-month-button:hover::before {
+        filter: invert(100%);
     }
 }

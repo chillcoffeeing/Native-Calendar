@@ -2,10 +2,16 @@ import {
     fieldsBoxBuilder,
     dropdownBuilder,
     datesBuilder,
-    refreshActiveDate,
-    monthsPicker,
     datePicker,
-    refreshActiveMonth
+    monthsPicker,
+    yearPicker,
+    refreshActiveDate,
+    refreshActiveMonth /* 
+    refreshActiveYear, */,
+    datePickerControlsBuilder,
+    refreshActiveYear,
+    yearPickerControlsBuilder,
+    monthPickerControlsBuilder
 } from '../util/builders'
 
 import NativeCalendarData from './native-calendar-data'
@@ -62,7 +68,7 @@ export default class NativeCalendar extends NativeCalendarData {
         this.root = {
             $el: rootElm,
             field: fieldsBoxBuilder(),
-            dropdown: dropdownBuilder({ ...this.coreState, dom: this.domState }, this.locale)
+            dropdown: dropdownBuilder()
         }
 
         this.root.field.$inputDate.addEventListener('keydown', (e) => this.keyboardHandler(e))
@@ -77,38 +83,62 @@ export default class NativeCalendar extends NativeCalendarData {
 
         this.root.field.$inputYear.addEventListener('input', (e) => this.fieldsHandler(e as InputEvent))
 
-        this.root.dropdown.$nextMonthEl.addEventListener(
-            'click',
-            () => (this.navigationHandler(true), this.refreshUI())
-        )
-
-        this.root.dropdown.$prevMonthEl.addEventListener(
-            'click',
-            () => (this.navigationHandler(false), this.refreshUI())
-        )
-
         this.root.field.$dropdownToggle.addEventListener('click', () => this.toggleHandler())
-
-        this.root.dropdown.$inputMonth.addEventListener('click', () => {
-            if (this.domState.currentPicker !== 'months') {
-                this.changePicker('months')
-            }
-        })
 
         this.root.dropdown.$pickerBoxEl.addEventListener('click', (e) => this.selectHandler(e))
 
         this.root.$el.appendChild(this.root.field.$inputBox)
 
         if (!options?.type) {
-            this.domState.picker.date = datePicker(
-                { ...this.coreState, dom: this.domState },
-                this.locale,
-                this.firstDayOfWeek
+            this.domState.picker.date = {
+                $el: datePicker({ ...this.coreState, dom: this.domState }, this.locale, this.firstDayOfWeek),
+                $controls: datePickerControlsBuilder({ ...this.coreState, dom: this.domState }, this.locale)
+            }
+
+            this.domState.picker.date?.$controls.$next.addEventListener(
+                'click',
+                () => (this.navigationHandler(true), this.refreshUI())
             )
 
-            this.domState.picker.month = monthsPicker(this.locale, this.domState)
+            this.domState.picker.date?.$controls.$prev.addEventListener(
+                'click',
+                () => (this.navigationHandler(false), this.refreshUI())
+            )
 
-            this.root.dropdown.$pickerBoxEl.appendChild(this.domState.picker.date)
+            this.domState.picker.date.$controls.$yearButton.addEventListener('click', () => {
+                if (this.domState.currentPicker !== 'year') {
+                    this.changePicker('year')
+                }
+            })
+
+            this.domState.picker.date.$controls.$monthButton.addEventListener('click', () => {
+                if (this.domState.currentPicker !== 'months') {
+                    this.changePicker('months')
+                }
+            })
+
+            this.domState.picker.month = {
+                $el: monthsPicker(this.locale, this.domState),
+                $controls: monthPickerControlsBuilder()
+            }
+
+            this.domState.picker.month.$controls.$close.addEventListener('click', () => this.changePicker('days'))
+
+            this.domState.picker.year = {
+                $el: yearPicker(this.coreState.current.year, this.domState),
+                $controls: yearPickerControlsBuilder(this.coreState.current),
+                initialYear: this.coreState.current.year
+            }
+
+            this.domState.picker.year.$controls.$next.addEventListener('click', () => this.yearRangeHandler(true))
+
+            this.domState.picker.year.$controls.$prev.addEventListener('click', () => this.yearRangeHandler(false))
+
+            this.domState.picker.year.$controls.$close.addEventListener('click', () => this.changePicker('days'))
+
+            this.root.dropdown.$pickerBoxEl.appendChild(this.domState.picker.date.$el)
+
+            this.root.dropdown.$navigationBoxEl.appendChild(this.domState.picker.date.$controls.$el)
         }
     }
 
@@ -152,13 +182,16 @@ export default class NativeCalendar extends NativeCalendarData {
 
     private refreshUI(): void {
         if (this.domState.currentPicker === 'days') {
-            this.root.dropdown.$inputMonth.textContent = this.locale.months[this.coreState.current.month].large
+            if (this.domState.picker.date)
+                this.domState.picker.date.$controls.$monthButton.textContent =
+                    this.locale.months[this.coreState.current.month].large
 
-            this.root.dropdown.$inputYear.textContent = this.coreState.current.year.toString()
+            if (this.domState.picker.date)
+                this.domState.picker.date.$controls.$yearButton.textContent = this.coreState.current.year.toString()
 
             const dates = datesBuilder({ ...this.coreState, dom: this.domState })
 
-            this.domState.picker.date?.lastChild?.replaceWith(dates)
+            this.domState.picker.date?.$el.lastChild?.replaceWith(dates)
         }
     }
 
@@ -172,10 +205,25 @@ export default class NativeCalendar extends NativeCalendarData {
     private changePicker = (picker: DomState['currentPicker']) => {
         this.domState.currentPicker = picker
         if (picker === 'days') {
-            this.root.dropdown.$pickerBoxEl.firstChild?.replaceWith(this.domState.picker.date as HTMLDivElement)
+            this.root.dropdown.$pickerBoxEl.firstChild?.replaceWith(this.domState.picker.date?.$el as HTMLDivElement)
+
+            this.root.dropdown.$navigationBoxEl.firstChild?.replaceWith(
+                this.domState.picker.date?.$controls.$el as HTMLDivElement
+            )
         } else if (picker === 'months') {
-            this.root.dropdown.$pickerBoxEl.firstChild?.replaceWith(this.domState.picker.month as HTMLDivElement)
+            this.root.dropdown.$pickerBoxEl.firstChild?.replaceWith(this.domState.picker.month?.$el as HTMLDivElement)
+            this.root.dropdown.$navigationBoxEl.firstChild?.replaceWith(
+                this.domState.picker.month?.$controls.$el as HTMLDivElement
+            )
+        } else if (picker === 'year') {
+            this.root.dropdown.$pickerBoxEl.firstChild?.replaceWith(this.domState.picker.year?.$el as HTMLDivElement)
+
+            this.root.dropdown.$navigationBoxEl.firstChild?.replaceWith(
+                this.domState.picker.year?.$controls.$el as HTMLDivElement
+            )
         }
+
+        this.domState.currentPicker = picker
     }
 
     private navigationHandler(factor: boolean): void {
@@ -186,6 +234,26 @@ export default class NativeCalendar extends NativeCalendarData {
         this.eventTrigger('onChange', this.coreState.current)
     }
 
+    private yearRangeHandler(after: boolean): void {
+        if (this.domState.picker.year) {
+            this.domState.picker.year.initialYear = this.domState.picker.year.initialYear + (after ? +16 : -16)
+
+            const newPicker = yearPicker(this.domState.picker.year.initialYear, this.domState)
+
+            this.domState.picker.year.$controls.$prev.textContent =
+                (this.domState.picker.year.initialYear - 16).toString() +
+                ' - ' +
+                (this.domState.picker.year.initialYear - 1).toString()
+
+            this.domState.picker.year.$controls.$next.textContent =
+                (this.domState.picker.year.initialYear + 16).toString() +
+                ' - ' +
+                (this.domState.picker.year.initialYear + 31).toString()
+
+            this.root.dropdown.$pickerBoxEl.firstChild?.replaceWith(newPicker)
+        }
+    }
+
     private keyboardHandler(e: KeyboardEvent) {
         const { code, target } = e
 
@@ -193,22 +261,32 @@ export default class NativeCalendar extends NativeCalendarData {
 
         const field = (ref.dataset as DOMStringMap).type as 'year' | 'month' | 'date'
 
-        let newValue: number | string = ''
-
-        switch (code) {
-            case 'Up':
-            case 'ArrowUp':
-                if (!ref.value) newValue = 1
-                else newValue = Number(ref.value) + 1
-                this.updateFieldsState = { [field]: newValue }
-                break
-            case 'Down':
-            case 'ArrowDown':
-                if (Number(ref.value) > 0) {
-                    newValue = Number(ref.value) - 1
-                    this.updateFieldsState = { [field]: newValue }
+        if (/(ArrowUp|Up|Down|ArrowDown)/.test(code)) {
+            const updating = {
+                value: '',
+                update: false,
+                set setValue(value: string) {
+                    this.value = value
+                    this.update = true
                 }
-                break
+            }
+
+            e.preventDefault()
+
+            switch (code) {
+                case 'Up':
+                case 'ArrowUp':
+                    updating.setValue = (!ref.value ? 1 : Number(ref.value) + 1).toString()
+                    this.updateFieldsState = { [field]: updating.value }
+                    break
+                case 'Down':
+                case 'ArrowDown':
+                    updating.setValue = Number(ref.value) > 1 ? (Number(ref.value) - 1).toString() : ''
+                    this.updateFieldsState = { [field]: updating.value }
+                    break
+            }
+
+            if (updating.update) this.refreshUI()
         }
     }
 
@@ -238,9 +316,8 @@ export default class NativeCalendar extends NativeCalendarData {
                             : data
                         : possibleValue
 
-                this.updateFieldsState = {
-                    [field]: newValue
-                }
+                this.updateFieldsState = { [field]: newValue }
+
                 if (isDate) {
                     this.updateCoreState = new Date(
                         new Date(this.coreState.current.initialDate).setDate(Number(newValue))
@@ -255,9 +332,8 @@ export default class NativeCalendar extends NativeCalendarData {
                     isMonth && this.root.field.$inputYear.focus()
                 }
             } else if (field === 'year') {
-                this.updateFieldsState = {
-                    [field]: ref.value
-                }
+                this.updateFieldsState = { [field]: ref.value }
+
                 this.updateCoreState = new Date(
                     new Date(this.coreState.current.initialDate).setFullYear(Number(ref.value))
                 )
@@ -276,42 +352,64 @@ export default class NativeCalendar extends NativeCalendarData {
     }
 
     private selectHandler(e: MouseEvent) {
+        const target = e?.target as HTMLElement
+
+        const info =
+            this.domState.currentPicker === 'days'
+                ? !!target.dataset?.info && parseHash(target.dataset.info)
+                : target.dataset?.info
+
         if (this.domState.currentPicker === 'days') {
-            const target = e?.target as HTMLElement
-
-            const info = !!target.dataset?.info && parseHash(target.dataset.info)
-
-            if (info) {
+            if (info && typeof info !== 'string') {
                 this.domState.currentSelected.hash = info.hash
 
-                if (/next-date/.test(target.className)) this.navigationHandler(true)
-                else if (/prev-date/.test(target.className)) this.navigationHandler(false)
-                else refreshActiveDate(this.root.dropdown.$pickerBoxEl.lastChild as HTMLUListElement, this.domState)
+                if (/next-date/.test(target.className)) this.navigationHandler(true), this.refreshUI()
+                else if (/prev-date/.test(target.className)) this.navigationHandler(false), this.refreshUI()
+                else
+                    refreshActiveDate(
+                        this.root.dropdown.$pickerBoxEl.firstChild?.lastChild as HTMLUListElement,
+                        this.domState
+                    )
 
                 this.updateFieldsState = info.data
 
                 this.toggleHandler()
 
-                this.refreshUI()
-
                 this.eventTrigger('onSelect', this.domState.currentSelected)
             }
         } else if (this.domState.currentPicker === 'months') {
-            const target = e.target as HTMLElement
-
             const info = target.dataset?.info
 
             if (info) {
                 this.updateCoreState = calcMonthDate(this.coreState.current.initialDate, Number(info))
 
-                this.updateFieldsState = {
-                    month: (Number(info) + 1).toString()
-                }
+                this.updateFieldsState = { month: (Number(info) + 1).toString() }
 
                 refreshActiveMonth(
-                    this.domState.picker.month?.querySelector('.nc-month-list') as HTMLUListElement,
+                    this.domState.picker.month?.$el?.querySelector('.nc-month-list') as HTMLUListElement,
                     this.domState
                 )
+
+                this.changePicker('days')
+
+                this.refreshUI()
+            }
+        } else if (this.domState.currentPicker === 'year') {
+            const info = target.dataset?.info
+
+            if (info && this.domState.picker.year) {
+                this.updateCoreState = new Date(new Date(this.coreState.current.initialDate).setFullYear(Number(info)))
+
+                this.updateFieldsState = { year: Number(info).toString() }
+
+                refreshActiveYear(
+                    (this.root.dropdown.$pickerBoxEl.firstChild as HTMLDivElement).querySelector(
+                        '.nc-year-list'
+                    ) as HTMLUListElement,
+                    this.domState
+                )
+
+                this.domState.picker.year.$el = this.root.dropdown.$pickerBoxEl.firstChild as HTMLDivElement
 
                 this.changePicker('days')
 
